@@ -89,7 +89,7 @@ def train_vgg(trainLoader):
 
         avg_loss = 0
         cnt = 0
-        for images, labels in tqdm.tqdm(trainLoader):
+        for images, labels in tqdm.tqdm(trainLoader, desc='E%d' % epoch):
             images = images.to(df_device)
             labels = labels.to(df_device)
 
@@ -106,7 +106,7 @@ def train_vgg(trainLoader):
         scheduler.step(avg_loss)
         print('e%d: loss %f' % (epoch, avg_loss / cnt))
         # Save the Trained Model
-        torch.save(vgg16.state_dict(), 'model/vgg.pkl' % epoch)
+        torch.save(vgg16.state_dict(), 'model/vgg.pkl')
     return vgg16
 
 
@@ -139,5 +139,5 @@ if __name__ == '__main__':
     trainLoader, testLoader = cifar.trainLoader, cifar.testLoader
 
     # path = 'model/vgg_e0.pkl' if len(sys.argv) == 2 else sys.argv[2]
-    vgg = VGG16(n_classes=N_CLASSES)
-    test_vgg16(vgg, testLoader)
+    vggmod = VGG16(n_classes=N_CLASSES)
+    test_vgg16(vggmod, testLoader)

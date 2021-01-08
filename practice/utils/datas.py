@@ -14,7 +14,7 @@ data_root = os.path.join(os.path.dirname(practice.__file__), 'data')
 
 
 class CIFAR:
-    def __init__(self, img_size=224, batch_size=4, is_download=False):
+    def __init__(self, img_size=224, batch_size=10, is_download=False):
         transform = transforms.Compose([
             transforms.RandomResizedCrop(img_size),
             transforms.RandomHorizontalFlip(),

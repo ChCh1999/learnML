@@ -6,3 +6,4 @@
 from practice import models
 from practice import Script
 from practice import utils
+import config

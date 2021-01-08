@@ -6,4 +6,5 @@
 import practice
 import os
 
-model_root = os.path.join(os.path.dirname(practice.__file__), 'model')
+# model_root = os.path.join(os.path.dirname(practice.__file__), 'model')
+model_root = practice.config.model_root

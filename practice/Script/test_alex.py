@@ -13,5 +13,6 @@ if __name__ == '__main__':
         print('please given model path')
     path = sys.argv[1]
     data = utils.datas.CIFAR().testLoader
-    alex = models.AlexNet(num_classes=10).load_state_dict(torch.load(path))
+    alex = models.AlexNet(num_classes=10)
+    alex.load_state_dict(torch.load(path))
     utils.train.test_classifier(alex, data)

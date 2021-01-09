@@ -3,6 +3,11 @@
 # @Author :   Ch
 # File    :   resnet_sample.py
 # @Time   :   2021/1/8 17:09
+# -#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+# @Author :   Ch
+# File    :   resnet.py
+# @Time   :   2021/1/6 22:36
 import torch
 import torch.nn as nn
 
@@ -25,7 +30,6 @@ model_urls = {
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
-    # dilation and padding make sure conv don't change data size when stride==1
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=dilation, groups=groups, bias=False, dilation=dilation)
 
@@ -38,7 +42,7 @@ def conv1x1(in_planes, out_planes, stride=1):
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, in_chan, out_chan, stride=1, downsample=None, groups=1,
+    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
                  base_width=64, dilation=1, norm_layer=None):
         super(BasicBlock, self).__init__()
         if norm_layer is None:
@@ -47,18 +51,14 @@ class BasicBlock(nn.Module):
             raise ValueError('BasicBlock only supports groups=1 and base_width=64')
         if dilation > 1:
             raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
-
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
-        # consists of two 3*3 conv
-        self.stride = stride
-        self.conv1 = conv3x3(in_chan, out_chan, stride)
-        self.bn1 = norm_layer(out_chan)
+        self.conv1 = conv3x3(inplanes, planes, stride)
+        self.bn1 = norm_layer(planes)
         self.relu = nn.ReLU(inplace=True)
-
-        self.conv2 = conv3x3(out_chan, out_chan)
-        self.bn2 = norm_layer(out_chan)
-
+        self.conv2 = conv3x3(planes, planes)
+        self.bn2 = norm_layer(planes)
         self.downsample = downsample
+        self.stride = stride
 
     def forward(self, x):
         identity = x
@@ -219,7 +219,7 @@ class ResNet(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        x = self.my_fc(x)
+        x = self.fc(x)
 
         return x
 

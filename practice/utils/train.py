@@ -38,7 +38,7 @@ def train_classifier(net, trainLoader, save_path='model/net.pkl',
 
             # Forward + Backward + Optimize
             optimizer.zero_grad()
-            _, outputs = net(images)
+            outputs = net(images)
             loss = cost(outputs, labels)
             avg_loss += loss.data
             cnt += 1

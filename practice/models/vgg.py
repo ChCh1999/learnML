@@ -72,59 +72,7 @@ class VGG16(nn.Module):
         out = self.layer7(out)
         out = self.layer8(out)
 
-        return vgg16_features, out
-
-
-def train_vgg(trainLoader):
-    vgg16 = VGG16(n_classes=N_CLASSES)
-    vgg16.to(df_device)
-
-    # Loss, Optimizer & Scheduler
-    cost = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(vgg16.parameters(), lr=LEARNING_RATE)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
-
-    # Train the model
-    for epoch in range(EPOCH):
-
-        avg_loss = 0
-        cnt = 0
-        for images, labels in tqdm.tqdm(trainLoader, desc='E%d' % epoch):
-            images = images.to(df_device)
-            labels = labels.to(df_device)
-
-            # Forward + Backward + Optimize
-            optimizer.zero_grad()
-            _, outputs = vgg16(images)
-            loss = cost(outputs, labels)
-            avg_loss += loss.data
-            cnt += 1
-            # print("[E: %d
-            # ] loss: %f, avg_loss: %f" % (epoch, loss.data, avg_loss / cnt))
-            loss.backward()
-            optimizer.step()
-        scheduler.step(avg_loss)
-        print('e%d: loss %f' % (epoch, avg_loss / cnt))
-        # Save the Trained Model
-        torch.save(vgg16.state_dict(), 'model/vgg.pkl')
-    return vgg16
-
-
-def test_vgg16(vgg16, testLoader):
-    # Test the model
-    vgg16.eval()
-    vgg16.to(df_device)
-    correct = 0
-    total = 0
-
-    for images, labels in testLoader:
-        images = images.to(df_device)
-        _, outputs = vgg16(images)
-        _, predicted = torch.max(outputs.data, 1)
-        total += labels.size(0)
-        correct += (predicted.cpu() == labels).sum()
-        # print(predicted, labels, correct, total)
-        print("avg acc: %f" % (correct / total))
+        return out
 
 
 def load_vgg(path):
@@ -135,9 +83,4 @@ def load_vgg(path):
 
 
 if __name__ == '__main__':
-    cifar = datas.CIFAR(batch_size=BATCH_SIZE)
-    trainLoader, testLoader = cifar.trainLoader, cifar.testLoader
-
-    # path = 'model/vgg_e0.pkl' if len(sys.argv) == 2 else sys.argv[2]
-    vggmod = VGG16(n_classes=N_CLASSES)
-    test_vgg16(vggmod, testLoader)
+    pass

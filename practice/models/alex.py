@@ -46,12 +46,11 @@ class AlexNet(nn.Module):
         x = self.fc(x)
         return x
 
-    def load_pretrained_model(self, freeze_flag):
+    def load_pretrained_model(self, freeze_flag=True):
         torchvision.models.alexnet()
         self.load_state_dict(
             torch.hub.load_state_dict_from_url('https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
                                                model_dir=config.model_root), strict=False)
         if freeze_flag:
-            for param in self.features.parameters(), self.classifier.parameters():
+            for i,param in enumerate(self.features.parameters() and self.classifier.parameters()):
                 param.require_grad = False
-

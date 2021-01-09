@@ -7,16 +7,40 @@ import torch
 import torch.nn as nn
 import tqdm
 import os
+import time
+import pynvml
 
 # df_device = torch.device('cpu')
 df_device = torch.device('cuda')
 
 
+def gpu_queue(thresh=2000):
+    # select GPU automatically
+    pynvml.nvmlInit()
+
+    all_gpu_queue = [0, 1, 2, 3]
+    gpu_queue = []
+    while len(gpu_queue) == 0:
+        for index in all_gpu_queue:
+            handle = pynvml.nvmlDeviceGetHandleByIndex(index)
+            meminfo = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            if meminfo.used / 1024 / 1024 < thresh:  # treating a gpu as empty, when its memory usage is smaller than thresh M
+                gpu_queue.append(index)
+        if len(gpu_queue) == 0:  # no gpu available
+            print("Waiting for Free GPU ......")
+            time.sleep(60)
+    gpu_id = gpu_queue.pop()
+    print("Using GPU devices: {}".format(gpu_id))
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
+    return gpu_queue
+
+
 def train_classifier(net, trainLoader, save_path='model/net.pkl',
                      LEARNING_RATE=0.01,
-                     EPOCH=50):
+                     EPOCH=50,
+                     ):
     net.to(df_device)
-
+    net = nn.DataParallel(net)
     # Loss, Optimizer & Scheduler
     cost = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=LEARNING_RATE)
@@ -32,7 +56,8 @@ def train_classifier(net, trainLoader, save_path='model/net.pkl',
 
         avg_loss = 0
         cnt = 0
-        for images, labels in tqdm.tqdm(trainLoader, desc="E%d" % epoch):
+        iterater = tqdm.tqdm(trainLoader, desc="E%d" % epoch)
+        for images, labels in iterater:
             images = images.to(df_device)
             labels = labels.to(df_device)
 
@@ -44,10 +69,13 @@ def train_classifier(net, trainLoader, save_path='model/net.pkl',
             cnt += 1
             # print("[E: %d
             # ] loss: %f, avg_loss: %f" % (epoch, loss.data, avg_loss / cnt))
+            # iterater.set_postfix_str("loss: %f, avg_loss: %f" % (loss.data, avg_loss / cnt))
             loss.backward()
             optimizer.step()
         scheduler.step(avg_loss)
-        print('e%d: loss %f' % (epoch, avg_loss / cnt))
+
+        print('\ne%d: loss %f' % (epoch, avg_loss / cnt))
+
         # Save the Trained Model
         torch.save(net.state_dict(), save_path)
     return net

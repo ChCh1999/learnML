@@ -11,4 +11,5 @@ import os
 data = datas.CIFAR(img_size=224)
 res = practice.models.resnet18(pretrained=True, num_classes=10)
 train.EPOCH = 50
+train.df_device = 'cuda'
 train.train_classifier(res, data.trainLoader, os.path.join(config.model_root, 'resnet.pt'))

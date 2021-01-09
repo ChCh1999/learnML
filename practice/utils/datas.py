@@ -9,8 +9,9 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import practice
 import os
+import practice.config as config
 
-data_root = os.path.join(os.path.dirname(practice.__file__), 'data')
+data_root = config.data_root
 
 
 class CIFAR:
@@ -23,6 +24,7 @@ class CIFAR:
                                  std=[0.229, 0.224, 0.225]),
         ])
         data_path = os.path.join(data_root, 'cifar')
+        print('load cifar dataset from', data_path)
         train_set = torchvision.datasets.CIFAR10(root=data_path, train=True,
                                                  download=is_download, transform=transform)
         self.trainLoader = DataLoader(train_set, batch_size=batch_size,
